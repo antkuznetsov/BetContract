@@ -1,0 +1,59 @@
+pragma solidity ^0.4.0;
+
+contract disput {
+    
+    struct bet {
+          address addr;
+          uint value;
+          string comment;
+    }
+    
+    bet myBet;
+    bet bet1;
+    bet bet2;
+    
+    address owner;
+    bet[] bettings;
+    
+    function disput() { 
+        
+        owner = msg.sender; 
+    
+    }
+    
+    function makeBet(uint _num, string _comment) payable {
+        
+        if (msg.value < 100000000000000000) throw; //Ставка не меньше 0,1 ETH
+        
+        myBet = bet({
+               addr     : msg.sender,
+               value    : _num,
+               comment  : _comment
+        });
+        
+        bettings.push(myBet); // Добавляем ставку в список
+
+        bidAccepted(
+            msg.sender,
+            _num,
+            _comment
+        );
+    }
+    
+    function result() {
+        if (owner != msg.sender) throw;
+        
+        bet winner;
+        
+        if (bettings[0].value > bettings[1].value) {
+            winner = bettings[0];
+        } else {
+            winner = bettings[1];
+        }
+        
+        if (winner.addr.send(this.balance)) disputeWasHeld("Победитель определен!", winner.addr, winner.value);
+    }
+    
+    event bidAccepted(address _address, uint _num, string _comment);
+    event disputeWasHeld(string _comment, address _address, uint _num);
+}
